@@ -1,0 +1,12 @@
+Resources:
+  myEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      AvailabilityZone: eu-central-1a
+      InstanceType: t2.micro
+      ImageId: ami-098efcc0d4f80810e
+      KeyName: kops_key
+      Tags:
+        - Key: "Name"
+          Value: !Join [ "-", [ my, first, instance ] ]
+        

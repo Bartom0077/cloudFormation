@@ -1,0 +1,70 @@
+Parameters:
+  InstanceName:
+    Type: String
+    Default: myInstance
+    MaxLength: 20
+
+  InstanceType:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - m1.small
+      - m1.large
+    Description: Enter t2.micro, t2.small, t2.medium, m1.small, or m1.large. Default is t2.micro.
+  KeyPair:
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: kops_key
+  VPNConnection:
+    Type: String
+    Default: Poland
+    AllowedValues:
+      - Poland
+      - Germany
+    Description: Select current location of VPN server
+
+Mappings: 
+  RegionMap: 
+    eu-central-1: 
+      AMI: ami-098efcc0d4f80810e
+    eu-west-1: 
+      AMI: ami-04149c54d7c56180d
+    eu-west-2:
+      AMI: ami-098efcc0d4f80810e
+    eu-west-3:
+      AMI: ami-098efcc0d4f80810e
+    eu-north-1:
+      AMI: ami-098efcc0d4f80810e
+  VPNServers:
+    Poland: 
+      IP: 95.214.0.0/16
+    Germany: 
+      IP: 5.180.0.0/16
+
+Resources:
+  VPCStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: 'https://mycloudformation007.s3.eu-central-1.amazonaws.com/VPC.yaml'
+
+  SGStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: 'https://mycloudformation007.s3.eu-central-1.amazonaws.com/securityGroups.yaml'
+      Parameters:
+        CidrIp: !FindInMap [ VPNServers, "Poland", IP ]
+        myVPC: !GetAtt VPCStack.Outputs.myVPC
+
+  EC2Stack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: 'https://mycloudformation007.s3.eu-central-1.amazonaws.com/EC2Instance.yaml'
+      Parameters:
+        ImageId: !FindInMap [ RegionMap, !Ref "AWS::Region", AMI ]
+        SubnetId: !GetAtt VPCStack.Outputs.mySubnet
+        SecurityGroupId: !GetAtt SGStack.Outputs.InstanceSecurityGroup
+        InstanceType: !Ref InstanceType
+        KeyName: !Ref KeyPair
+        Name: !Ref InstanceName

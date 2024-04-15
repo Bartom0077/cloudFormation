@@ -1,0 +1,23 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Main Template containing all stacks
+
+Resources:
+  NetworkStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: 's3://mycloudformation007/VPC.yaml'
+  
+  SecurityGroupStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: 's3://mycloudformation007/securityGroups.yaml'
+      Parameters:
+        VPCId: !GetAtt NetworkStack.Outputs.VPCId
+  
+  EC2InstanceStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: 's3://mycloudformation007/EC2Instance.yaml'
+      Parameters:
+        SubnetId: !GetAtt NetworkStack.Outputs.SubnetId
+        SecurityGroupId: !GetAtt SecurityGroupStack.Outputs.SecurityGroupId

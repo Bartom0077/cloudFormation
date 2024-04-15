@@ -1,0 +1,34 @@
+Parameters:
+  CidrIp:
+    Type: String
+    Description: "CIDR IP range for the security group ingress."
+  myVPC:
+    Type: AWS::EC2::VPC::Id
+    Description: "The ID of the VPC where the security group will be created."
+
+Resources:
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow http and ssh from Nord VPN servers in Poland
+      VpcId: !Ref myVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: !Ref CidrIp
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref CidrIp
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+Outputs:
+  InstanceSecurityGroup:
+    Description: "InstanceSecurityGroup"
+    Value: !Ref InstanceSecurityGroup
+    Export:
+      Name: InstanceSecurityGroup
