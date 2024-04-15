@@ -63,8 +63,8 @@ Resources:
       TemplateURL: 'https://mycloudformation007.s3.eu-central-1.amazonaws.com/EC2Instance.yaml'
       Parameters:
         ImageId: !FindInMap [ RegionMap, !Ref "AWS::Region", AMI ]
-        SubnetId: !GetAtt VPCStack.Outputs.mySubnet
-        SecurityGroupId: !GetAtt SGStack.Outputs.InstanceSecurityGroup
+        mySubnet: !GetAtt VPCStack.Outputs.mySubnet
+        InstanceSecurityGroup: !GetAtt SGStack.Outputs.InstanceSecurityGroup
         InstanceType: !Ref InstanceType
-        KeyName: !Ref KeyPair
-        Name: !Ref InstanceName
+        KeyPair: !Ref KeyPair
+        InstanceName: !Ref InstanceName
