@@ -32,4 +32,42 @@ Resources:
       Tags:
         - Key: "Name"
           Value: !Ref InstanceName
-        
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          yum update -y
+          /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource myEC2Instance --region ${AWS::Region}
+          /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource myEC2Instance --region ${AWS::Region}
+    Metadata:
+        AWS::CloudFormation::Init:
+            config:
+                packages:
+                    yum:
+                      php: []
+                      httpd: []
+                      wget: []
+                      unzip: []
+                      git: []
+                commands:
+                    01_download_template:
+                        command: wget -O /tmp/website.zip https://www.tooplate.com/zip-templates/2137_barista_cafe.zip
+                    02_unpack_template:
+                        command: unzip /tmp/website.zip -d /var/www/html/
+                    03_copy_files:
+                        command: cp -R /var/www/html/2137_barista_cafe/* /var/www/html/.
+                    04_remove_zip:
+                        command: rm -Rf /var/www/html/2137_barista_cafe
+                files:
+                    /var/www/html/hello.html:
+                      content: !Sub |
+                          <!DOCTYPE html>
+                          <html>
+                          <body>
+                          <h1>Welcome to CloudFormation.</h1>
+                          </body>
+                          </html>
+                services:
+                    sysvinit:
+                        httpd:
+                            enabled: true
+                            ensureRunning: true
